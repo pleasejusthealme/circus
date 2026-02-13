@@ -1,0 +1,160 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circus: an Octra wallet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css?v=20260213c">
+</head>
+<body>
+  <div class="bg-noise" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <main class="layout">
+    <aside class="rail card">
+      <div class="brand-block">
+        <p class="kicker">WEB-UI OCTRA CLIENT</p>
+        <h1>Circus</h1>
+        <p class="muted" data-i18n="hero.subtitle">Приватный localhost-интерфейс для удобной работы с кошельком</p>
+      </div>
+
+      <div class="lang-switch" id="langSwitch" aria-label="Language switch">
+        <button type="button" class="lang-btn" data-lang="ru">RU</button>
+        <button type="button" class="lang-btn" data-lang="en">ENG</button>
+      </div>
+
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Theme toggle">Light theme</button>
+      <button id="refreshBtn" class="btn btn-wide" data-i18n="actions.refresh">Обновить</button>
+
+      <section class="mini card-soft">
+        <h2 data-i18n="wallet.title">Кошелёк</h2>
+        <div class="mini-row"><span data-i18n="wallet.address">Адрес</span><code id="walletAddress">—</code></div>
+        <div class="mini-row"><span>RPC</span><code id="walletRpc">—</code></div>
+      </section>
+
+      <section class="mini card-soft">
+        <h2 data-i18n="log.title">Системный лог</h2>
+        <pre id="logBox" class="log"></pre>
+      </section>
+    </aside>
+
+    <section class="content">
+      <section id="bootScreen" class="card boot-screen">
+        <div class="spinner" aria-hidden="true"></div>
+        <h2 data-i18n="boot.title">Подключение клиента</h2>
+        <p id="bootMessage" class="muted" data-i18n="boot.init">Инициализация...</p>
+      </section>
+
+      <section id="setupScreen" class="card" hidden>
+        <h2 data-i18n="setup.title">Первичная настройка кошелька</h2>
+        <p class="muted" data-i18n="setup.subtitle">Введите private token и address.</p>
+        <label><span data-i18n="setup.private_token">Private token</span>
+          <input id="setupPriv" type="password" autocomplete="off" data-i18n-placeholder="setup.private_token_ph" placeholder="base64 private token">
+        </label>
+        <label><span data-i18n="setup.address">Address</span>
+          <input id="setupAddr" data-i18n-placeholder="setup.address_ph" placeholder="oct...">
+        </label>
+        <label><span data-i18n="setup.rpc_optional">RPC (опционально)</span>
+          <input id="setupRpc" value="https://octra.network" data-i18n-placeholder="setup.rpc_ph" placeholder="https://octra.network">
+        </label>
+        <button id="setupBtn" class="btn" data-i18n="setup.submit">Войти</button>
+        <p id="setupError" class="error-text"></p>
+      </section>
+
+      <div id="clientScreen" hidden>
+        <section class="stats-grid">
+          <article class="metric card-soft">
+            <span class="metric-label" data-i18n="stats.public_balance">Public Balance</span>
+            <strong id="publicBalance" class="metric-value">—</strong>
+          </article>
+          <article class="metric card-soft">
+            <span class="metric-label" data-i18n="stats.encrypted_balance">Encrypted Balance</span>
+            <strong id="encryptedBalance" class="metric-value">—</strong>
+          </article>
+          <article class="metric card-soft">
+            <span class="metric-label" data-i18n="stats.nonce">Nonce</span>
+            <strong id="walletNonce" class="metric-value">—</strong>
+          </article>
+          <article class="metric card-soft">
+            <span class="metric-label" data-i18n="stats.pending_private">Pending Private</span>
+            <strong id="pendingCount" class="metric-value">—</strong>
+          </article>
+        </section>
+
+        <section class="card panel-grid">
+          <article class="panel card-soft">
+            <h2 data-i18n="send.title">Send Transaction</h2>
+            <label><span data-i18n="send.to">Кому</span>
+              <input id="sendTo" data-i18n-placeholder="send.to_ph" placeholder="oct...">
+            </label>
+            <label><span data-i18n="send.amount">Сумма (OCT)</span>
+              <input id="sendAmount" type="number" step="0.000001" min="0">
+            </label>
+            <label><span data-i18n="send.message">Сообщение (опционально)</span>
+              <input id="sendMessage" maxlength="1024">
+            </label>
+            <button id="sendBtn" class="btn" data-i18n="actions.send">Отправить</button>
+          </article>
+
+          <article class="panel card-soft encrypted-panel">
+            <h2 data-i18n="enc.title">Encrypted Balance</h2>
+            <div class="enc-group">
+              <label><span data-i18n="enc.encrypt_amount">Сумма для Encrypt</span>
+                <input id="encryptAmount" type="number" step="0.000001" min="0">
+              </label>
+              <button id="encryptBtn" class="btn" data-i18n="actions.encrypt">Encrypt</button>
+            </div>
+            <div class="enc-group">
+              <label><span data-i18n="enc.decrypt_amount">Сумма для Decrypt</span>
+                <input id="decryptAmount" type="number" step="0.000001" min="0">
+              </label>
+              <button id="decryptBtn" class="btn" data-i18n="actions.decrypt">Decrypt</button>
+            </div>
+          </article>
+
+          <article class="panel card-soft">
+            <h2 data-i18n="private.title">Private Transfer</h2>
+            <label><span data-i18n="private.to">Кому</span>
+              <input id="privateTo" data-i18n-placeholder="private.to_ph" placeholder="oct...">
+            </label>
+            <label><span data-i18n="private.amount">Сумма (OCT)</span>
+              <input id="privateAmount" type="number" step="0.000001" min="0">
+            </label>
+            <button id="privateBtn" class="btn" data-i18n="actions.private_send">Отправить приватно</button>
+          </article>
+
+          <article class="panel card-soft">
+            <h2 data-i18n="claim.title">Claim Transfers</h2>
+            <div id="claimList" class="claim-list"></div>
+          </article>
+        </section>
+
+        <section class="card">
+          <h2 data-i18n="history.title">История транзакций</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="history.time">Time</th>
+                  <th data-i18n="history.type">Type</th>
+                  <th data-i18n="history.amount">Amount</th>
+                  <th data-i18n="history.from">From</th>
+                  <th data-i18n="history.to">To</th>
+                  <th data-i18n="history.epoch">Epoch</th>
+                  <th data-i18n="history.hash">Hash</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js?v=20260213c"></script>
+</body>
+</html>
